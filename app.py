@@ -2,29 +2,9 @@ import os
 import time
 import requests
 import streamlit as st
-import uvicorn  # Add this
-from fastapi import FastAPI
-from utils import process_news
 
-import spacy
-try:
-    spacy.load("en_core_web_sm")
-except OSError:
-    os.system("python -m spacy download en_core_web_sm")
-
-# FastAPI app setup
-api = FastAPI(title="News Summarization & TTS API")
-
-@api.get("/")
-def read_root():
-    return {"message": "Welcome to the News Summarization & TTS API"}
-
-@api.get("/news/{company_name}")
-def get_news(company_name: str):
-    return process_news(company_name)
-
-# Streamlit app setup
-API_URL = "http://127.0.0.1:8000"  # Use localhost instead of 0.0.0.0
+# 🔥 Change this to match your Hugging Face Space name
+API_URL = "https://news-summarise-tts.hf.space"  # Replace with your actual Space URL
 
 st.title("News Summarization and Hindi TTS Application")
 company = st.text_input("Enter Company Name", "")
@@ -34,7 +14,6 @@ if st.button("Fetch News"):
         st.warning("Please enter a valid company name.")
     else:
         with st.spinner("Fetching and processing news..."):
-            time.sleep(2)  # Give FastAPI some time to start
             try:
                 response = requests.get(f"{API_URL}/news/{company}")
                 if response.status_code == 200:
@@ -71,10 +50,5 @@ if st.button("Fetch News"):
                         st.error("Audio file not found or TTS generation failed.")
                 else:
                     st.error("Failed to fetch news from the API. Please try again.")
-            except requests.exceptions.ConnectionError:
-                st.error("API is not running yet. Please wait a moment and try again.")
-
-# 🛠️ **Start FastAPI Server**
-if __name__ == "__main__":
-    import threading
-    threading.Thread(target=lambda: uvicorn.run(api, host="127.0.0.1", port=8000), daemon=True).start()
+            except requests.exceptions.RequestException as e:
+                st.error(f"API error: {e}")
