@@ -1,9 +1,7 @@
 import os
-import threading
 import time
 import requests
 import streamlit as st
-import uvicorn
 from fastapi import FastAPI
 from utils import process_news
 
@@ -11,7 +9,6 @@ import spacy
 try:
     spacy.load("en_core_web_sm")
 except OSError:
-    import os
     os.system("python -m spacy download en_core_web_sm")
 
 # FastAPI app setup
@@ -25,15 +22,8 @@ def read_root():
 def get_news(company_name: str):
     return process_news(company_name)
 
-# Function to run FastAPI in a separate thread
-def run_fastapi():
-    uvicorn.run(api, host="0.0.0.0", port=8000)
-
-# Start FastAPI in a separate thread
-threading.Thread(target=run_fastapi, daemon=True).start()
-
 # Streamlit app setup
-API_URL = "http://127.0.0.1:8000"  # Since FastAPI runs in the same Space
+API_URL = "http://0.0.0.0:8000"  # FastAPI runs in the same environment
 
 st.title("News Summarization and Hindi TTS Application")
 company = st.text_input("Enter Company Name", "")
