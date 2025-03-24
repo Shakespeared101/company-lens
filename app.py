@@ -2,6 +2,7 @@ import os
 import time
 import requests
 import streamlit as st
+import uvicorn  # Add this
 from fastapi import FastAPI
 from utils import process_news
 
@@ -23,7 +24,7 @@ def get_news(company_name: str):
     return process_news(company_name)
 
 # Streamlit app setup
-API_URL = "http://0.0.0.0:8000"  # FastAPI runs in the same environment
+API_URL = "http://127.0.0.1:8000"  # Use localhost instead of 0.0.0.0
 
 st.title("News Summarization and Hindi TTS Application")
 company = st.text_input("Enter Company Name", "")
@@ -72,3 +73,8 @@ if st.button("Fetch News"):
                     st.error("Failed to fetch news from the API. Please try again.")
             except requests.exceptions.ConnectionError:
                 st.error("API is not running yet. Please wait a moment and try again.")
+
+# 🛠️ **Start FastAPI Server**
+if __name__ == "__main__":
+    import threading
+    threading.Thread(target=lambda: uvicorn.run(api, host="127.0.0.1", port=8000), daemon=True).start()
