@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from utils import process_news
-import os
 
 app = FastAPI(title="News Summarization & TTS API")
 
@@ -21,8 +20,6 @@ def get_news(company_name: str):
     """
     return process_news(company_name)
 
-# Hugging Face automatically runs this service
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 7860))  # Hugging Face assigns a dynamic port
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

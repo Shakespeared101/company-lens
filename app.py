@@ -1,10 +1,45 @@
 import os
+import threading
 import time
 import requests
 import streamlit as st
+import uvicorn
+from fastapi import FastAPI
+from utils import process_news
+import asyncio
+import sys
 
-# 🔥 Change this to match your Hugging Face Space name
-API_URL = "https://news-summarise-tts.hf.space"  # Replace with your actual Space URL
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+import spacy
+try:
+    spacy.load("en_core_web_sm")
+except OSError:
+    import os
+    os.system("python -m spacy download en_core_web_sm")
+
+
+# FastAPI app setup
+api = FastAPI(title="News Summarization & TTS API")
+
+@api.get("/")
+def read_root():
+    return {"message": "Welcome to the News Summarization & TTS API"}
+
+@api.get("/news/{company_name}")
+def get_news(company_name: str):
+    return process_news(company_name)
+
+# # Function to run FastAPI in a separate thread
+# def run_fastapi():
+#     uvicorn.run(api, host="0.0.0.0", port=8000)
+
+# # Start FastAPI in a separate thread
+# threading.Thread(target=run_fastapi, daemon=True).start()
+
+# # Streamlit app setup
+API_URL = "http://127.0.0.1:8000"  # Since FastAPI runs in the same Space
 
 st.title("News Summarization and Hindi TTS Application")
 company = st.text_input("Enter Company Name", "")
@@ -14,6 +49,7 @@ if st.button("Fetch News"):
         st.warning("Please enter a valid company name.")
     else:
         with st.spinner("Fetching and processing news..."):
+            time.sleep(2)  # Give FastAPI some time to start
             try:
                 response = requests.get(f"{API_URL}/news/{company}")
                 if response.status_code == 200:
@@ -50,5 +86,5 @@ if st.button("Fetch News"):
                         st.error("Audio file not found or TTS generation failed.")
                 else:
                     st.error("Failed to fetch news from the API. Please try again.")
-            except requests.exceptions.RequestException as e:
-                st.error(f"API error: {e}")
+            except requests.exceptions.ConnectionError:
+                st.error("API is not running yet. Please wait a moment and try again.")
