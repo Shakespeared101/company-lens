@@ -11,13 +11,19 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from nltk.sentiment import SentimentIntensityAnalyzer
 import time
+import subprocess   
 
 # Download NLTK resources
 nltk.download('vader_lexicon')
 sia = SentimentIntensityAnalyzer()
 
 # Load spaCy Named Entity Recognition model
-nlp = spacy.load("en_core_web_sm")
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    print("Downloading 'en_core_web_sm' model...")
+    subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
+    nlp = spacy.load("en_core_web_sm")
 
 # Load BERT Sentiment Analyzer
 bert_sentiment = pipeline("sentiment-analysis", model="siebert/sentiment-roberta-large-english")
