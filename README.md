@@ -1,5 +1,5 @@
 ---
-title: "News Summarizer & TTS"
+title: "Company Lens"
 emoji: "📰"
 colorFrom: "blue"
 colorTo: "green"
@@ -7,7 +7,7 @@ sdk: "streamlit"
 app_file: "app.py"
 pinned: false
 ---
-# News Summarisation and Hindi TTS Application
+# Company Lens
 
 ## Project Overview
 
